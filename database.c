@@ -24,7 +24,7 @@ struct satelliteData
 
 BST* datasetIntoBST(BST *bist)//int *array, struct satelliteData *satDat)
 {
-  FILE *fp = fopen("input.txt", "r");
+  FILE *fp = fopen("../input.txt", "r");
   if(feof(fp))
   {
     return 0;
@@ -263,8 +263,6 @@ void printOneItem(SNODE *s, FILE *fp)
   fprintf(fp, "%s\t", s->startYr);
   fprintf(fp, "%s\t", s->runtimeMin);
   fprintf(fp, "%s\t", s->genres);
-  //if (s->mediaType != NULL)
-
   fprintf(fp, "%s\t", s->mediaType);
   fprintf(fp, "%s\t", s->dateAdded);
   fprintf(fp, "\n");
@@ -377,6 +375,7 @@ int main(void)
   char *itemsearch = "The Girl Who Took the Wrong Turning"; //"The Girl Who Loves a Soldier";
   item = searchNode(itemsearch);
 
+  /* READING SEQUENCE */
   SNODE *found;
   fprintf(stdout, "prefind\n");
   found = findBST(userlog, item);
@@ -401,22 +400,24 @@ int main(void)
   //4) determine change type
   //    delete
   //    update
+  //    changeuser
 
   //5) implement changes
-
-
-
   //newdate = input 1;
-  /*
+
+  /*  UPDATING SEQUENCE
   char *newdate = "2/11/2222";
   found->dateAdded = newdate; //newdate;
   */
 
-  //fprintf(stdout, "um\n");
-  //write log with changes
-  //char *logname = "testlog";
+  /* DELETING SEQUENCE
   deleteBST(userlog, found);
+  */
+
+  /* COMMIT TO LOG FILE
   writeToFile(logname, getBSTroot(userlog));
+  */
+
 
   //alert user changes have been made and ask for more input
 
