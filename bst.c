@@ -170,6 +170,7 @@ extern SNODE *insertBST(BST *tree,SNODE *value)
             }
         }
     }
+    fprintf(stdout, "successful INSERT\n");
     setBSTsize(tree, tree->size + 1);
     return n;
 }
