@@ -608,7 +608,7 @@ int main(void)
 
       SNODE *specific = malloc(sizeof(SNODE));
       specific = searchNode(input);
-      printOneItem(specific, stdout);
+    //  printOneItem(specific, stdout);
   //    fprintf(stdout, "did die here?\n");
   //    fprintf(stdout, "|%s|\n", specific->primaryTitle);
       // ------------- Works up to here --------------
@@ -734,7 +734,7 @@ int main(void)
       char reading[256];
       char updating[256];
       specific = searchNode(input);
-      fprintf(stdout, "FINDING NEW\n");
+    //  fprintf(stdout, "FINDING NEW\n");
       found = findBST(userlog, specific);
 
       while(found == NULL)
@@ -744,12 +744,12 @@ int main(void)
         input[strcspn(input, "\n")] = 0;
 
         specific = searchNode(input);
-        fprintf(stdout, "FINDING NEW\n");
+        //fprintf(stdout, "FINDING NEW\n");
         found = findBST(userlog, specific);
       }
       //ok this is great but why do some of them not exist?
 
-      fprintf(stdout, "MADE IT\n");
+    //  fprintf(stdout, "MADE IT\n");
       fprintf(stdout, "What would you like to update? (title, year, runtime, genres, mediatype, date)\n");
       //scanf("%s", reading);
       fgets(reading, 255, stdin);
@@ -759,30 +759,66 @@ int main(void)
       //scanf("%s", updating);
       fgets(updating, 255, stdin);
       updating[strcspn(updating, "\n")] = 0;
-
+      char *newnew;
       if(strcmp(reading, "title") == 0)
       {
-        strcpy(found->realTitle, updating);
+        newnew = malloc(400);
+        for (int i=0; i<399; i++)
+        {
+          newnew[i] = updating[i];
+        }
+        found->realTitle = newnew;
+        //strcpy(found->realTitle, updating);
       }
       else if(strcmp(reading, "year") == 0)
       {
-        strcpy(found->startYr, updating);
+        newnew = malloc(400);
+        for (int i=0; i<399; i++)
+        {
+          newnew[i] = updating[i];
+        }
+        found->startYr = newnew;
+        //strcpy(found->startYr, updating);
       }
       else if(strcmp(reading, "runtime") == 0)
       {
-        strcpy(found->runtimeMin, updating);
+        newnew = malloc(400);
+        for (int i=0; i<399; i++)
+        {
+          newnew[i] = updating[i];
+        }
+        found->runtimeMin = newnew;
+        //strcpy(found->runtimeMin, updating);
       }
       else if(strcmp(reading, "genres") == 0)
       {
-        strcpy(found->genres, updating);
+        newnew = malloc(400);
+        for (int i=0; i<399; i++)
+        {
+          newnew[i] = updating[i];
+        }
+        found->genres = newnew;
+        //strcpy(found->genres, updating);
       }
       else if(strcmp(reading, "mediatype") == 0)
       {
-        strcpy(found->mediaType, updating);
+        newnew = malloc(400);
+        for (int i=0; i<399; i++)
+        {
+          newnew[i] = updating[i];
+        }
+        found->mediaType = newnew;
+        //strcpy(found->mediaType, updating);
       }
       else if(strcmp(reading, "date") == 0)
       {
-        strcpy(found->dateAdded, updating);
+        newnew = malloc(400);
+        for (int i=0; i<399; i++)
+        {
+          newnew[i] = updating[i];
+        }
+        found->dateAdded = newnew;
+        //strcpy(found->dateAdded, updating);
       }
     }
     else if(strcmp(doInput, "retrieve") == 0)

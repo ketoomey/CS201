@@ -229,8 +229,8 @@ extern void  *findBST(BST *tree,SNODE *key)
     head = getBSTroot(tree);
     while (head != NULL)
     {
-        fprintf(stdout, "~~~ %s\n", head->realTitle);
-        fprintf(stdout, "*** %s\n", key->primaryTitle);
+    //    fprintf(stdout, "~~~ %s\n", head->realTitle);
+    //    fprintf(stdout, "*** %s\n", key->primaryTitle);
         cmp = strcmp(lowercase(head->realTitle), lowercase(key->primaryTitle));
         if (cmp > 0)
         {
@@ -461,7 +461,7 @@ extern void  *buildTinyBST(BST *tree,SNODE *key, BST *tiny)
           duplicate->left = NULL;
           duplicate->right = NULL;
           insertBST(tiny, duplicate);
-          fprintf(stdout, "word we found a substring\n");
+          //fprintf(stdout, "word we found a substring\n");
         }
         cmp = strcmp(lowercase(head->primaryTitle), lowercase(key->primaryTitle));
         if (cmp > 0)
