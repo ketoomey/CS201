@@ -24,14 +24,30 @@ struct satelliteData
 };
 
 
-BST* datasetIntoBST(BST *bist, char *fileName)//int *array, struct satelliteData *satDat)
+BST* datasetIntoBST(BST *bist, char fileName[])//int *array, struct satelliteData *satDat)
 {
-  FILE *fp = fopen(fileName, "r");
-  //if file does not exist
-  if(feof(fp))
+
+  int i = 0;
+  while(i == 0)
   {
-    return 0;
+    if( access( fileName, F_OK ) != -1 )
+    {
+       i = 1;
+    }
+    else
+    {
+       fprintf(stdout, "This file does not exist, please enter a different file.\n");
+       fgets(fileName, 250, stdin);
+       fileName[strcspn(fileName, "\n")] = 0;
+    }
   }
+
+  FILE *fp = fopen(fileName, "r");
+    if(feof(fp))
+    {
+      return 0;
+    }
+
   int ch, rindex, windex, wsize;
   char* word;
   char* tword;
@@ -56,11 +72,12 @@ BST* datasetIntoBST(BST *bist, char *fileName)//int *array, struct satelliteData
       rindex = 0;
 
       satDat->genres = word;
-
+      /*
       char *empty = malloc(20);
       empty[0] = '\\';
       empty[1] = 'N';
       satDat->mediaType = empty;
+      */
     //  fprintf(stdout, "meditype%s\n", empty);
 
       char text[100];
@@ -86,6 +103,7 @@ BST* datasetIntoBST(BST *bist, char *fileName)//int *array, struct satelliteData
         satDat->parent = NULL;
         satDat->left = NULL;
         satDat->right = NULL;
+        satDat->mediaType = NULL;
       //  fprintf(stdout, "INSERTING:: %p\n", satDat);
         insertBST(bist, satDat);
       }
@@ -187,6 +205,7 @@ BST* loadUserLog(char log[])//int *array, struct satelliteData *satDat)
   char name[100];
   strcpy(name, log);
   strcat(name, ".log");
+
   if(access(name, F_OK) != -1)
   {
     int i = 0;
@@ -195,7 +214,7 @@ BST* loadUserLog(char log[])//int *array, struct satelliteData *satDat)
   {
     return bist;
   }
-  FILE *fp = fopen(name, "r");
+  FILE *fp = fopen(name, "r+");
   if(feof(fp))
   {
     //fprintf(stdout, "pastfind\n");
@@ -249,7 +268,7 @@ BST* loadUserLog(char log[])//int *array, struct satelliteData *satDat)
             tword[i-4] = word[i];
           }
           satDat->primaryTitle = tword;
-          fprintf(stdout, "also set true word\n");
+        //  fprintf(stdout, "also set true word\n");
         }
         else if (word[0] == 'A' && word[1] == ' ') {
           tword = malloc(wsize);
@@ -257,7 +276,7 @@ BST* loadUserLog(char log[])//int *array, struct satelliteData *satDat)
             tword[i-2] = word[i];
           }
           satDat->primaryTitle = tword;
-          fprintf(stdout, "also set true word\n");
+      //    fprintf(stdout, "also set true word\n");
         }
         else if (word[0] == 'A' && word[1] == 'n' && word[2] == ' ') {
           tword = malloc(wsize);
@@ -265,7 +284,7 @@ BST* loadUserLog(char log[])//int *array, struct satelliteData *satDat)
             tword[i-3] = word[i];
           }
           satDat->primaryTitle = tword;
-          fprintf(stdout, "also set true word\n");
+        //  fprintf(stdout, "also set true word\n");
         }
         else {
           satDat->primaryTitle = word;
@@ -332,7 +351,7 @@ SNODE *searchNode(char *str)//, BST *main, BST *tiny)
 void printOneItem(SNODE *s, FILE *fp)
 {
   fprintf(fp, "%s\t", s->realTitle);
-  fprintf(fp, "%s\t", s->primaryTitle);
+//  fprintf(fp, "%s\t", s->primaryTitle);
   fprintf(fp, "%s\t", s->startYr);
   fprintf(fp, "%s\t", s->runtimeMin);
   fprintf(fp, "%s\t", s->genres);
@@ -454,7 +473,7 @@ int main(void)
 
   SNODE *found = malloc(sizeof(SNODE));
   SNODE *item = malloc(sizeof(SNODE));
-  SNODE *duplicate = malloc(sizeof(SNODE));
+  SNODE *duplicate;// = malloc(sizeof(SNODE));
 
   char fileName[256];
 //  fileName = "input.txt";
@@ -479,17 +498,20 @@ int main(void)
   fgets(fileName, 250, stdin);
   fileName[strcspn(fileName, "\n")] = 0;
 
+  //fprintf(stdout, "readin: %s|\n", fileName);
+
 
 
 
   //fprintf(stdout, "Dont forget to un comment out user input :)\n");
   //logname = "testlog";
+  //fprintf(stdout, "pre mass database insert\n");
   database = datasetIntoBST(database, fileName);
-  /*
+
   fprintf(stdout, "----------------------DATABASE----------------------------\n");
   printRowWise(getBSTroot(database), stdout);
   fprintf(stdout, "----------------------------------------------------------\n");
-  */
+
 
 
   /*SNODE *root = getBSTroot(database);
@@ -532,19 +554,19 @@ int main(void)
 
 
   BST *userlog = loadUserLog(logname);
-  fprintf(stdout, "Here is your current log\n");
+  fprintf(stdout, "Here is your current log:: \n");
   printRowWise(getBSTroot(userlog), stdout);
 //  fprintf(stdout, "made it here!\n");
 
 
   while(strcmp(keepGoing, "y") == 0)
   {
-    fprintf(stdout, "What would you like to do? (add, delete, update, retrieve, changeUser)\n");
+    fprintf(stdout, "What would you like to do? (add, delete, update, retrieve)\n");
     //scanf("%s", doInput);
     fgets(doInput, 11, stdin);
     doInput[strcspn(doInput, "\n")] = 0;
 
-    while(strcmp(doInput, "add")!= 0 && strcmp(doInput, "delete")!= 0 && strcmp(doInput, "update")!= 0 && strcmp(doInput, "retrieve") != 0 && strcmp(doInput, "changeUser")!= 0)
+    while(strcmp(doInput, "add")!= 0 && strcmp(doInput, "delete")!= 0 && strcmp(doInput, "update")!= 0 && strcmp(doInput, "retrieve") != 0 )//&& strcmp(doInput, "changeUser")!= 0)
     {
       printf("I'm sorry, that was not an option, please choose again\n");
       printf("What would you like to do? (add, delete, update, changeUser)\n");
@@ -559,12 +581,24 @@ int main(void)
 
       fgets(itemsearch, 250, stdin);
       itemsearch[strcspn(itemsearch, "\n")] = 0;
+      //fprintf(stdout, "itemsearch: %s\n", itemsearch);
       item = searchNode(itemsearch);
 
-  //    fprintf(stdout, "------------------------TINY---------------------------\n");
+
       buildTinyBST(database, item, tinybst);
+
+      while(getBSTroot(tinybst) == NULL)
+      {
+        fprintf(stdout, "I'm sorry, that title does not exist in the database, please enter different search word\n");
+        fgets(itemsearch, 250, stdin);
+        itemsearch[strcspn(itemsearch, "\n")] = 0;
+        item = searchNode(itemsearch);
+        buildTinyBST(database, item, tinybst);
+      }
+      fprintf(stdout, "----------------------------- Search Results -----------------------------\n");
       printRowWise(getBSTroot(tinybst), stdout);
-  //    fprintf(stdout, "----------------------------------------------------------\n");
+      fprintf(stdout, "---------------------------------------------------------------------------\n");
+
 
       fprintf(stdout, "Which movie would you like to add? Please copy and paste the title of the selection\n");
       fgets(input, 250, stdin);
@@ -579,61 +613,62 @@ int main(void)
   //    fprintf(stdout, "|%s|\n", specific->primaryTitle);
       // ------------- Works up to here --------------
 
-      fprintf(stdout, "FINDING NEW\n");
+      //fprintf(stdout, "FINDING NEW\n");
       found = findBST(tinybst, specific);
-/*      if (found == NULL)
+      while(found == NULL)
       {
-        fprintf(stdout, "why is this null\n");
+        fprintf(stdout, "I'm sorry, that title does not exist in the search results, please enter the title of the selection\n");
+        fgets(input, 250, stdin);
+        input[strcspn(input, "\n")] = 0;
+        specific = searchNode(input);
+        found = findBST(tinybst, specific);
       }
-      fprintf(stdout, "post find\n");
-*/
-      //SNODE *duplicate = malloc(sizeof(SNODE));
+
+      duplicate = malloc(sizeof(SNODE));
       duplicate->primaryTitle = found->primaryTitle;
       duplicate->realTitle = found->realTitle;
       //fprintf(stdout, "1\n");
+      //fprintf(stdout, "checking title:: %s\n", found->realTitle);
       duplicate->genres = found->genres;
+      //fprintf(stdout, "checking title ***:: %s\n", duplicate->realTitle);
       //fprintf(stdout, "2\n");
+      //fprintf(stdout, "checking gen:: %s\n", found->genres);
       duplicate->startYr = found->startYr;
       //fprintf(stdout, "3\n");
+      //fprintf(stdout, "checking yr:: %s\n", found->startYr);
       duplicate->runtimeMin = found->runtimeMin;
+    //  fprintf(stdout, "checking min***:: %s\n", duplicate->runtimeMin);
       //fprintf(stdout, "4\n");
+      //fprintf(stdout, "checking date:: %s\n", found->dateAdded);
       duplicate->dateAdded = found->dateAdded;
+      //fprintf(stdout, "checking date ***:: %s\n", duplicate->dateAdded);
       //fprintf(stdout, "5\n");
+      //fprintf(stdout, "checking mediaType:: %s\n", found->mediaType);
       duplicate->mediaType = found->mediaType;
-      //fprintf(stdout, "MADE IT\n");
+      //fprintf(stdout, "past duplicate->mediaType\n");
 
       insertBST(userlog, duplicate);
-      found = findBST(userlog, duplicate);
+
+      //fprintf(stdout, "checking title again:: %s\n", found->realTitle);
+      if (found == NULL)
+      {
+          fprintf(stdout, "why is this null\n");
+      }
 
       fprintf(stdout, "What media type is this? (examples: blueray, dvd, digital)\n");
       //scanf("%s", found->mediaType);
       fgets(temp, 15, stdin);
       temp[strcspn(temp, "\n")] = 0;
-    //  fprintf(stdout, "about to assign to mediaType\n");
-      //found->mediaType = temp;
-      /* NOOOT NEEDED
-      char *newtemp = malloc(256);
-      int i = 0;
-      //int len = sizeof(temp) / sizeof(temp[0]);
-      //fprintf(stdout, "len: %d\n", len);
-      while (i < 10)
+
+      char *newmedia;
+      newmedia = malloc(100);
+      for (int i=0; i<11; i++)
       {
-        fprintf(stdout, "%c ", temp[i]);
-        newtemp[i] = temp[i];
-        i++;
+        newmedia[i] = temp[i];
       }
-      fprintf(stdout, "out of while loop, assigning\n");
-      fprintf(stdout, "populated: %s\n", newtemp);
-      if (found == NULL) {
-        fprintf(stdout, "found is null lmao\n");
-      }
-      found->mediaType = newtemp;
-      //*/
+      duplicate->mediaType = newmedia;
 
-      strcpy(found->mediaType, temp);
-      fprintf(stdout, "Successfully assigned\n");
-
-
+      //     DATE ANSWER
       fprintf(stdout, "Would you like to add the date added? (y or n)\n");
       //scanf("%c", &dateAddedAnswer);
       fgets(dateAddedAnswer, 3, stdin);
@@ -644,7 +679,15 @@ int main(void)
         //scanf("%s", found->dateAdded);
         fgets(temp, 15, stdin);
         temp[strcspn(temp, "\n")] = 0;
-        strcpy(found->dateAdded, temp);
+        //strcpy(found->dateAdded, temp);
+        char *newdate;
+        newdate = malloc(100);
+        for (int i=0; i<11; i++)
+        {
+          newdate[i] = temp[i];
+        }
+        duplicate->dateAdded = newdate;
+
       }
       else
       {
@@ -673,6 +716,7 @@ int main(void)
       fgets(input, 255, stdin);
       input[strcspn(input, "\n")] = 0;
 
+
       SNODE *byebyebye = malloc(sizeof(SNODE));
       byebyebye = searchNode(input);
       deleteBST(userlog, byebyebye);
@@ -681,7 +725,7 @@ int main(void)
     else if(strcmp(doInput, "update")==0)
     {
       printRowWise(getBSTroot(userlog), stdout);
-      fprintf(stdout, "Which selection would you like to update? Please copy and paste from above.\n");
+      fprintf(stdout, "Which selection would you like to update? Please copy and paste the title from above.\n");
       //scanf("%s ", input); //will this work?
       fgets(input, 255, stdin);
       input[strcspn(input, "\n")] = 0;
@@ -692,6 +736,19 @@ int main(void)
       specific = searchNode(input);
       fprintf(stdout, "FINDING NEW\n");
       found = findBST(userlog, specific);
+
+      while(found == NULL)
+      {
+        fprintf(stdout, "I'm sorry, that title does not exist in the log, please enter different search word\n");
+        fgets(input, 255, stdin);
+        input[strcspn(input, "\n")] = 0;
+
+        specific = searchNode(input);
+        fprintf(stdout, "FINDING NEW\n");
+        found = findBST(userlog, specific);
+      }
+      //ok this is great but why do some of them not exist?
+
       fprintf(stdout, "MADE IT\n");
       fprintf(stdout, "What would you like to update? (title, year, runtime, genres, mediatype, date)\n");
       //scanf("%s", reading);
@@ -732,20 +789,30 @@ int main(void)
     {
       printRowWise(getBSTroot(userlog), stdout);
     }
-
+/*
     else if(strcmp(doInput, "changeUser") == 0)
     {
         writeToFile(logname, getBSTroot(userlog));
       //  char logname2[256];
       //  fprintf(stdout, "Which user log would you like to change to?\n");
         fprintf(stdout, "What log would you like to write to?\n");
-        fgets(logname, 250, stdin);
-        logname[strcspn(logname, "\n")] = 0;
+        fgets(temp, 250, stdin);
+        temp[strcspn(temp, "\n")] = 0;
+
+        char *newlog;
+        newlog = malloc(100);
+        for (int i=0; i<11; i++)
+        {
+          newlog[i] = temp[i];
+        }
+        strcpy(logname, newlog);
 
         fprintf(stdout, "um what: %s\n", logname);
-        userlog = loadUserLog(logname);
+        fprintf(stdout, "------------\n");
+        //userlog = loadUserLog(logname);
         //strcpy(logname, logname2);
     }
+    */
 
     tinybst = newBST();
     fprintf(stdout, "Change made, would you like to make other changes? (y or n)\n");

@@ -309,8 +309,11 @@ extern SNODE *locateBST(BST *tree,SNODE *key) {
 extern int deleteBST(BST *tree,void *key)
 {
     SNODE *tmp = locateBST(tree, key);
-    if (tmp == NULL) {
-        printf("cannot find\n"); return -1;}
+    while (tmp == NULL)
+    {
+        printf("I'm sorry, this title does not exist in the log.\n");
+        return -1;
+    }
 
     tmp = swapToLeafBST(tree, tmp);
     pruneLeafBST(tree, tmp);
@@ -454,6 +457,9 @@ extern void  *buildTinyBST(BST *tree,SNODE *key, BST *tiny)
           duplicate->type = head->type;
           duplicate->dateAdded= head->dateAdded;
           duplicate->mediaType= head->mediaType;
+          duplicate->parent = NULL;
+          duplicate->left = NULL;
+          duplicate->right = NULL;
           insertBST(tiny, duplicate);
           fprintf(stdout, "word we found a substring\n");
         }
