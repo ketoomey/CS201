@@ -19,12 +19,30 @@ struct satelliteData
   char* genres; //index 8
   char* mediaType; //read in later
   char* dateAdded; //read in later
+  char* realTitle;
 
   void *left;
   void *right;
   void *parent;
 };
 
+char *lowercase(char *word)
+{
+  char *str = malloc(4000);
+  for(int i = 0; word[i]; i++)
+  {
+    str[i] = tolower(word[i]);
+  }
+  return str;
+}
+
+/***************************************************************************************
+*    Title: bst.c
+*    Author: Matthew Rinne
+*    Date Accessed: <03/05/2019>
+*    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
+*
+***************************************************************************************/
 void initSwapper(SNODE *n1,SNODE *n2)
 {
     void *x = n1->primaryTitle;
@@ -37,45 +55,36 @@ struct bst
 {
     SNODE *root;
     int size;
-  //  int debug;
     swapper swap_funct;
     comparator comp;
-  //  display_f display_funct;
-  //  free_f free_funct;
 };
 
-extern BST *newBST()//int (*c)(void *,void *))
+
+extern BST *newBST()
 {
     BST *tree = malloc(sizeof(BST));
     assert(tree != 0);
     tree->size = 0;
-  //  tree->comp = c;
     tree->root = NULL;
-  //  t->debug = 0;
-
-    //t->swap_funct = NULL;
-    //setBSTswapper(tree, initSwapper);
-  //  tree->free_funct = NULL;
-  //  tree->display_funct = NULL;
-
     return tree;
 }
 
-/*
-//[OK]
-extern void setBSTswapper(BST *t,void (*s)(SNODE *,SNODE *))
-{
-    tree->swap_funct = s;
-}
-*/
+/***************************************************************************************
+*    Title: bst.c
+*    Author: Matthew Rinne
+*    Date Accessed: <03/05/2019>
+*    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
+*
+***************************************************************************************/
 extern SNODE *getBSTroot(BST *tree)
 {
     return tree->root;
 }
 
 
-extern void setBSTroot(BST *tree,SNODE *replacement) {
-  fprintf(stdout, "setting root\n");
+extern void setBSTroot(BST *tree,SNODE *replacement)
+{
+//  fprintf(stdout, "setting root\n");
     tree->root = replacement;
     if (replacement != NULL)
     {
@@ -83,69 +92,94 @@ extern void setBSTroot(BST *tree,SNODE *replacement) {
     }
 }
 
+/***************************************************************************************
+*    Title: bst.c
+*    Author: Matthew Rinne
+*    Date Accessed: <03/05/2019>
+*    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
+*
+***************************************************************************************/
 extern void setBSTsize(BST *tree,int s)
 {
     tree->size = s;
 }
 
+
 extern SNODE *insertBST(BST *tree,SNODE *value)
 {
-  fprintf(stdout, "intro\n");
-  /*
-    SNODE *n = locateBST(tree, value);
+//  fprintf(stdout, "intro\n");
 
-    if (n != NULL)
-    {
-      fprintf(stdout, "break return\n");
-      return n;
-    }
-    */
-    SNODE *n; //n = newSNODE(value, NULL, NULL, NULL);
+    SNODE *n;
     n = value;
-    fprintf(stdout, "help\n");
+  //  fprintf(stdout, "help\n");
     assert(n != 0);
-
-    // Set all nodes = the display and free functions?
-    //setSNODEdisplay(n, t->display_funct);
-    //setSNODEfree(n, t->free_funct);
 
     if (tree->size == 0)
     {
-        //fprintf(stdout, "hi please work\n");
         setBSTroot(tree, n);
-        //setBSTsize(tree, tree->size + 1);
-
     }
     else
     {
-      fprintf(stdout, "oh hey there please work\n");
+    //  fprintf(stdout, "oh hey there please work\n");
         SNODE *head, *tmp;
         int cmp, lvl = 0;
         head = getBSTroot(tree);
 
-        //fprintf(stdout, "head:: %p\n", head);
-        //fprintf(stdout, "val:: %p\n", n);
-
-        //fprintf(stdout, "headp:: %p\n", head->primaryTitle);
-        //fprintf(stdout, "valp:: %p\n", n->primaryTitle);
         while (head != NULL)
         {
+            /*
+            fprintf(stdout, "pre head print -->\n");
+            fprintf(stdout, "%s\t", head->primaryTitle);
+            fprintf(stdout, "%s\t", head->startYr);
+            fprintf(stdout, "%s\t", head->runtimeMin);
+            fprintf(stdout, "%s\t", head->genres);
+            fprintf(stdout, "%s\t", head->mediaType);
+            fprintf(stdout, "%s\t", head->dateAdded);
+            fprintf(stdout, "\npost head print -->\n");
+            */
             lvl++;
-            cmp = strcmp(head->primaryTitle, n->primaryTitle);
-            //fprintf(stdout, "inserte_cmp:: %d\n", cmp);
+            if (head->primaryTitle == NULL)
+            {
+              cmp = 0;
+            }
+            else
+            {
+              //fprintf(stdout, "~~~~~~~~~~~~~~~~~~~~~~~~\n");
+              //fprintf(stdout, "~~~~~~ %s\n", n->primaryTitle);
+              //fprintf(stdout, "~~~~~~~~~~~~~~~~~~~~~~~~\n");
+              //fprintf(stdout, "************************\n");
+              //fprintf(stdout, "******* %s\n", head->primaryTitle); //so something is wrong with the head
+              //fprintf(stdout, "************************\n");
+              cmp = strcmp(lowercase(head->primaryTitle), lowercase(n->primaryTitle)); //SEG FAULTING HERE!!!!
+            }
+            //fprintf(stdout, "past cmp:: %d\n", cmp);
             if (cmp > 0)
             {
                 tmp = head->left;
                 if (tmp == NULL)
                 {
-                  fprintf(stdout, "set left \n");
+                //  fprintf(stdout, "set left \n");
                     head->left = n;
                     n->parent = head;
+                    //fprintf(stdout, "if if\n");
                     break;
                 }
                 else
                 {
                     head = tmp;
+                    //fprintf(stdout, "if else\n");
+                    /*
+                    fprintf(stdout, " -->\n");
+                    fprintf(stdout, "%s\t", head->primaryTitle);
+                    fprintf(stdout, "%s\t", head->startYr);
+                    fprintf(stdout, "%s\t", head->runtimeMin);
+                    fprintf(stdout, "%s\t", head->genres);
+                    fprintf(stdout, "%s\t", head->mediaType);
+                    fprintf(stdout, "%s\t", head->dateAdded);
+                    fprintf(stdout, "\npost if else print -->\n");
+                    */
+                    //so i believe the issue is in here... porque???
+                    //perhaps when its called twice in a row
                 }
             }
             else if (cmp < 0)
@@ -153,27 +187,40 @@ extern SNODE *insertBST(BST *tree,SNODE *value)
                 tmp = head->right;
                 if (tmp == NULL)
                 {
-                  fprintf(stdout, "set right \n");
+                //  fprintf(stdout, "set right \n");
                     head->right = n;
                     n->parent = head;
+                    //fprintf(stdout, "else if\n");
                     break;
                 }
                 else
                 {
                     head = tmp;
+                    //fprintf(stdout, "else else\n");
                 }
             }
             else
             {
                 return head;
+                //fprintf(stdout, "else\n");
                 break;
             }
         }
     }
-    fprintf(stdout, "successful INSERT\n");
+  //  fprintf(stdout, "successful INSERT\n");
+
+    //fprintf(stdout, "%s\t", n->primaryTitle);
+    //fprintf(stdout, "%s\t", n->startYr);
+    //fprintf(stdout, "%s\t", n->runtimeMin);
+    //fprintf(stdout, "%s\t", n->genres);
+    //fprintf(stdout, "%s\t", n->mediaType);
+    //fprintf(stdout, "%s\t", n->dateAdded);
+    //fprintf(stdout, "\nhmmm\n");
+
     setBSTsize(tree, tree->size + 1);
     return n;
 }
+
 
 extern void  *findBST(BST *tree,SNODE *key)
 {
@@ -182,7 +229,9 @@ extern void  *findBST(BST *tree,SNODE *key)
     head = getBSTroot(tree);
     while (head != NULL)
     {
-        cmp = strcmp(head->primaryTitle, key->primaryTitle);
+        fprintf(stdout, "~~~ %s\n", head->realTitle);
+        fprintf(stdout, "*** %s\n", key->primaryTitle);
+        cmp = strcmp(lowercase(head->realTitle), lowercase(key->primaryTitle));
         if (cmp > 0)
         {
             tmp = head->left;
@@ -209,6 +258,7 @@ extern void  *findBST(BST *tree,SNODE *key)
     return NULL;
 }
 
+
 extern SNODE *locateBST(BST *tree,SNODE *key) {
 
     SNODE *head, *tmp;
@@ -221,7 +271,7 @@ extern SNODE *locateBST(BST *tree,SNODE *key) {
     {
       //fprintf(stdout, "HEADD:: %p\n", head->primaryTitle);
       //fprintf(stdout, "head:: %p\n", head);
-        cmp = strcmp(head->primaryTitle, key->primaryTitle);//make lower for comparisons
+        cmp = strcmp(lowercase(head->primaryTitle), lowercase(key->primaryTitle));//make lower for comparisons
         //fprintf(stdout, "Locate cmp:: %d\n", cmp);
         if (cmp > 0)
         {
@@ -249,6 +299,13 @@ extern SNODE *locateBST(BST *tree,SNODE *key) {
     return NULL;
 }
 
+/***************************************************************************************
+*    Title: bst.c
+*    Author: Matthew Rinne
+*    Date Accessed: <03/05/2019>
+*    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
+*
+***************************************************************************************/
 extern int deleteBST(BST *tree,void *key)
 {
     SNODE *tmp = locateBST(tree, key);
@@ -263,6 +320,13 @@ extern int deleteBST(BST *tree,void *key)
     return 0;
 }
 
+/***************************************************************************************
+*    Title: bst.c
+*    Author: Matthew Rinne
+*    Date Accessed: <03/05/2019>
+*    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
+*
+***************************************************************************************/
 SNODE *findPredecessor(SNODE *node)
 {
     node = node->left;
@@ -278,6 +342,13 @@ SNODE *findPredecessor(SNODE *node)
     return node;
 }
 
+/***************************************************************************************
+*    Title: bst.c
+*    Author: Matthew Rinne
+*    Date Accessed: <03/05/2019>
+*    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
+*
+***************************************************************************************/
 SNODE *findSuccessor(SNODE *node)
 {
     node = node->right;
@@ -292,6 +363,13 @@ SNODE *findSuccessor(SNODE *node)
     return node;
 }
 
+/***************************************************************************************
+*    Title: bst.c
+*    Author: Matthew Rinne
+*    Date Accessed: <03/05/2019>
+*    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
+*
+***************************************************************************************/
 extern SNODE *swapToLeafBST(BST *tree,SNODE *node)
 {
     if ((node->left == NULL) && (node->right == NULL))
@@ -318,6 +396,13 @@ extern SNODE *swapToLeafBST(BST *tree,SNODE *node)
     return swapToLeafBST(tree, tmp);
 }
 
+/***************************************************************************************
+*    Title: bst.c
+*    Author: Matthew Rinne
+*    Date Accessed: <03/05/2019>
+*    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
+*
+***************************************************************************************/
 extern void pruneLeafBST(BST *tree,SNODE *leaf)
 {
     SNODE *parent = leaf->parent;
@@ -337,20 +422,19 @@ extern void pruneLeafBST(BST *tree,SNODE *leaf)
     }
 }
 
+/***************************************************************************************
+*    Title: bst.c
+*    Author: Matthew Rinne
+*    Date Accessed: <03/05/2019>
+*    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
+*
+***************************************************************************************/
 extern int sizeBST(BST *tree)
 {
     return tree->size;
 }
 
-char *lowercase(char *word)
-{
-  char *str = malloc(4000);
-  for(int i = 0; word[i]; i++)
-  {
-    str[i] = tolower(word[i]);
-  }
-  return str;
-}
+
 
 extern void  *buildTinyBST(BST *tree,SNODE *key, BST *tiny)
 {
@@ -362,6 +446,7 @@ extern void  *buildTinyBST(BST *tree,SNODE *key, BST *tiny)
         if(strstr(lowercase(head->primaryTitle), lowercase(key->primaryTitle)))
         {
           SNODE *duplicate = malloc(sizeof(SNODE));
+          duplicate->realTitle = head->realTitle;
           duplicate->primaryTitle = head->primaryTitle;
           duplicate->genres = head->genres;
           duplicate->startYr = head->startYr;
@@ -372,7 +457,7 @@ extern void  *buildTinyBST(BST *tree,SNODE *key, BST *tiny)
           insertBST(tiny, duplicate);
           fprintf(stdout, "word we found a substring\n");
         }
-        cmp = strcmp(head->primaryTitle, key->primaryTitle);
+        cmp = strcmp(lowercase(head->primaryTitle), lowercase(key->primaryTitle));
         if (cmp > 0)
         {
             tmp = head->left;
@@ -382,7 +467,7 @@ extern void  *buildTinyBST(BST *tree,SNODE *key, BST *tiny)
             }
             head = tmp;
         }
-        else
+        else if (cmp < 0)
         {
             tmp = head->right;
             if (tmp == NULL)
@@ -390,6 +475,10 @@ extern void  *buildTinyBST(BST *tree,SNODE *key, BST *tiny)
               return NULL;
             }
             head = tmp;
+        }
+        else
+        {
+            return head;
         }
     }
     return NULL;
