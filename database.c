@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <curses.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -23,335 +22,10 @@ struct satelliteData
   void *parent;
 };
 
-
-BST* datasetIntoBST(BST *bist, char fileName[])//int *array, struct satelliteData *satDat)
-{
-
-  int i = 0;
-  while(i == 0)
-  {
-    if( access( fileName, F_OK ) != -1 )
-    {
-       i = 1;
-    }
-    else
-    {
-       fprintf(stdout, "This file does not exist, please enter a different file.\n");
-       fgets(fileName, 250, stdin);
-       fileName[strcspn(fileName, "\n")] = 0;
-    }
-  }
-
-  FILE *fp = fopen(fileName, "r");
-    if(feof(fp))
-    {
-      return 0;
-    }
-
-  int ch, rindex, windex, wsize;
-  char* word;
-  char* tword;
-  char *dateAdded;
-  wsize = 400;
-  word = malloc(wsize);
-  rindex = 0;
-  windex = 0;
-  ch = fgetc(fp);
-  if(ch == EOF) return 0;
-  SNODE* satDat = malloc(sizeof(SNODE));
-
-  while(ch != EOF)
-  {
-
-    if(ch == '\n')
-    {
-      //determine newlines
-      //fprintf(stdout, "%s", word);
-      //fprintf(stdout, "\n");
-      //define newline array
-      rindex = 0;
-
-      satDat->genres = word;
-      /*
-      char *empty = malloc(20);
-      empty[0] = '\\';
-      empty[1] = 'N';
-      satDat->mediaType = empty;
-      */
-    //  fprintf(stdout, "meditype%s\n", empty);
-
-      char text[100];
-      time_t now = time(NULL);
-      struct tm *t = localtime(&now);
-
-      strftime(text, sizeof(text)-1, "%m/%d/%Y", t);
-      //printf("Current Date: %s\n", text);
-
-      dateAdded = malloc(100);
-      for (int i=0; i<11; i++) {
-        dateAdded[i] = text[i];
-        //fprintf(stdout, "%c", text[i]);
-      }
-    //  fprintf(stdout, "\n");
-
-      satDat->dateAdded = dateAdded;
-
-    //  fprintf(stdout, "wanna insert: %s\n", satDat->type);
-      if(strcmp(satDat->type, "movie") == 0)
-      {
-        //fprintf(stdout, "did insert\n");
-        satDat->parent = NULL;
-        satDat->left = NULL;
-        satDat->right = NULL;
-        satDat->mediaType = NULL;
-      //  fprintf(stdout, "INSERTING:: %p\n", satDat);
-        insertBST(bist, satDat);
-      }
-    //  insertBST(bist, satDat);
-    //  fprintf(stdout, "SatDat_1:: %p\n", satDat);
-      satDat = malloc(sizeof(SNODE));
-    //  fprintf(stdout, "SatDat_2:: %p\n", satDat);
-
-      word = malloc(wsize);
-
-    }
-    else if(ch == '\t')
-    {
-      //fprintf(stdout, " ");
-      //new index of array
-      word[windex++] = '\0';
-      //fprintf(stdout, "%s", word);
-      //fprintf(stdout, " %p\n", word);
-      if(rindex == 1)
-      {
-        satDat->type = word;
-      }
-      else if(rindex == 2)
-      {
-        satDat->realTitle = word;
-        // 1) if A, The, An in the string
-        if (word[0] == 'T' && word[1] == 'h' && word[2] == 'e' && word[3] == ' ') {
-          tword = malloc(wsize);
-          for (int i=4; i<windex; i++){
-            tword[i-4] = word[i];
-          }
-          satDat->primaryTitle = tword;
-        //  fprintf(stdout, "also set true word\n");
-        }
-        else if (word[0] == 'A' && word[1] == ' ') {
-          tword = malloc(wsize);
-          for (int i=2; i<windex; i++){
-            tword[i-2] = word[i];
-          }
-          satDat->primaryTitle = tword;
-      //    fprintf(stdout, "also set true word\n");
-        }
-        else if (word[0] == 'A' && word[1] == 'n' && word[2] == ' ') {
-          tword = malloc(wsize);
-          for (int i=3; i<windex; i++){
-            tword[i-3] = word[i];
-          }
-          satDat->primaryTitle = tword;
-        //  fprintf(stdout, "also set true word\n");
-        }
-        else {
-          satDat->primaryTitle = word;
-        }
-      }
-      else if(rindex == 5)
-      {
-        satDat->startYr = word;
-      }
-      else if(rindex == 7)
-      {
-        satDat->runtimeMin = word;
-      }
-      else if(rindex == 8)
-      {
-      //  fprintf(stdout, "setting genre");
-        satDat->genres = word;
-      }
-      else
-      {
-        free(word);
-      }
-      //char* word = malloc(wsize);
-      //fprintf(stdout, "word:: %p\n", word);
-      word = malloc(wsize);
-      windex = 0;
-      rindex++;
-    }
-    else
-    {
-      //fprintf(stdout, "%c", ch);
-      //add characters to buffer
-      if (windex > wsize)
-      {
-        wsize = 2 * wsize;
-        word = realloc(word, wsize);
-      }
-      word[windex++] = ch;
-    }
-    ch = fgetc(fp);
-  }
-  return bist;
-}
-
-
-BST* loadUserLog(char log[])//int *array, struct satelliteData *satDat)
-{
-
-  BST *bist = newBST();
-  char name[100];
-  strcpy(name, log);
-  strcat(name, ".log");
-
-  if(access(name, F_OK) != -1)
-  {
-    int i = 0;
-  }
-  else
-  {
-    return bist;
-  }
-  FILE *fp = fopen(name, "r+");
-  if(feof(fp))
-  {
-    //fprintf(stdout, "pastfind\n");
-    return bist;
-  }
-  int ch, rindex, windex, wsize;
-  char* word;
-  char* tword;
-  char *dateAdded;
-  wsize = 400;
-  word = malloc(wsize);
-  rindex = 0;
-  windex = 0;
-  ch = fgetc(fp);
-  if(ch == EOF) return bist;
-  SNODE* satDat = malloc(sizeof(SNODE));
-
-  while(ch != EOF)
-  {
-
-    if(ch == '\n')
-    {
-      //determine newlines
-      fprintf(stdout, "%s", word);
-      fprintf(stdout, "\n");
-      //define newline array
-      rindex = 0;
-
-      satDat->dateAdded = word;
-
-      insertBST(bist, satDat);
-      satDat = malloc(sizeof(SNODE));
-
-      word = malloc(wsize);
-
-    }
-    else if(ch == '\t')
-    {
-      fprintf(stdout, " ");
-      //new index of array
-      word[windex++] = '\0';
-      //fprintf(stdout, "%s", word);
-      //fprintf(stdout, " %p\n", word);
-      if(rindex == 0)
-      {
-        satDat->realTitle = word;
-        // 1) if A, The, An in the string
-        if (word[0] == 'T' && word[1] == 'h' && word[2] == 'e' && word[3] == ' ') {
-          tword = malloc(wsize);
-          for (int i=4; i<windex; i++){
-            tword[i-4] = word[i];
-          }
-          satDat->primaryTitle = tword;
-        //  fprintf(stdout, "also set true word\n");
-        }
-        else if (word[0] == 'A' && word[1] == ' ') {
-          tword = malloc(wsize);
-          for (int i=2; i<windex; i++){
-            tword[i-2] = word[i];
-          }
-          satDat->primaryTitle = tword;
-      //    fprintf(stdout, "also set true word\n");
-        }
-        else if (word[0] == 'A' && word[1] == 'n' && word[2] == ' ') {
-          tword = malloc(wsize);
-          for (int i=3; i<windex; i++){
-            tword[i-3] = word[i];
-          }
-          satDat->primaryTitle = tword;
-        //  fprintf(stdout, "also set true word\n");
-        }
-        else {
-          satDat->primaryTitle = word;
-        }
-      }
-      else if(rindex == 1)
-      {
-      //  fprintf(stdout, "yr: %s\n", word);
-        satDat->startYr = word;
-      }
-      else if(rindex == 2)
-      {
-      //  fprintf(stdout, "runtime: %s\n", word);
-        satDat->runtimeMin = word;
-      }
-      else if(rindex == 3)
-      {
-      //  fprintf(stdout, "genres: %s\n", word);
-        satDat->genres = word;
-      }
-      else if(rindex == 4)
-      {
-        satDat->mediaType = word;
-      }
-      else if(rindex == 5)
-      {
-        satDat->dateAdded = word;
-      }
-      else
-      {
-        free(word);
-      }
-      //char* word = malloc(wsize);
-      //fprintf(stdout, "word:: %p\n", word);
-      word = malloc(wsize);
-      windex = 0;
-      rindex++;
-    }
-    else
-    {
-      //fprintf(stdout, "%c", ch);
-      //add characters to buffer
-      if (windex > wsize)
-      {
-        wsize = 2 * wsize;
-        word = realloc(word, wsize);
-      }
-      word[windex++] = ch;
-    }
-    ch = fgetc(fp);
-  }
-  fclose(fp);
-  return bist;
-}
-
-SNODE *searchNode(char *str)//, BST *main, BST *tiny)
-{
-  SNODE *temp = malloc(sizeof(SNODE));
-  temp->primaryTitle = str;
-
-  return temp;
-}
-
+//prints one element of the satelliteData struct
 void printOneItem(SNODE *s, FILE *fp)
 {
   fprintf(fp, "%s\t", s->realTitle);
-//  fprintf(fp, "%s\t", s->primaryTitle);
   fprintf(fp, "%s\t", s->startYr);
   fprintf(fp, "%s\t", s->runtimeMin);
   fprintf(fp, "%s\t", s->genres);
@@ -360,11 +34,11 @@ void printOneItem(SNODE *s, FILE *fp)
   fprintf(fp, "\n");
 }
 
+//prints the titles of the binary search tree in order
 void printInOrder(SNODE *s)
 {
   if(s == NULL)
   {
-    //fprintf(stdout, "NULL\n");
     return;
   }
   fprintf(stdout, "[");
@@ -383,6 +57,7 @@ void printInOrder(SNODE *s)
   fprintf(stdout, "]");
 }
 
+//prints all elements of the in order by title name
 void printRowWise(SNODE *s, FILE *fp)
 {
   if(s == NULL)
@@ -398,74 +73,340 @@ void printRowWise(SNODE *s, FILE *fp)
 
 }
 
-void writeToFile(char log[], SNODE *newishLog)
+//reads the all the data from the file into the binary search tree
+BST* datasetIntoBST(BST *bist, char fileName[])
 {
+
   int i = 0;
+  //checks to see if the file exists
+  while(i == 0)
+  {
+    if( access( fileName, F_OK ) != -1 )
+    {
+       i = 1;
+    }
+    else
+    {
+       fprintf(stdout, "This file does not exist, please enter a different file.\n");
+       fgets(fileName, 250, stdin);
+       fileName[strcspn(fileName, "\n")] = 0;
+    }
+  }
+
+  FILE *fp = fopen(fileName, "r");
+  if(feof(fp))
+  {
+    return 0;
+  }
+
+  int ch, rindex, windex, wsize;
+  char* word;
+  char* tword;
+  char *dateAdded;
+
+  wsize = 400;
+  word = malloc(wsize);
+  rindex = 0;
+  windex = 0;
+  ch = fgetc(fp);
+  if(ch == EOF) return 0;
+  SNODE* satDat = malloc(sizeof(SNODE));
+
+  while(ch != EOF)
+  {
+    // If found newline, end of single record
+    if(ch == '\n')
+    {
+
+      // Populating the current time
+      char text[100];
+      time_t now = time(NULL);
+      struct tm *t = localtime(&now);
+      strftime(text, sizeof(text)-1, "%m/%d/%Y", t);
+      dateAdded = malloc(100);
+      for (int i=0; i<11; i++) {
+        dateAdded[i] = text[i];
+      }
+      satDat->dateAdded = dateAdded;
+
+      satDat->genres = word;
+
+      // Determines if it is a movie and if so it adds to database
+      if(strcmp(satDat->type, "movie") == 0)
+      {
+        satDat->parent = NULL;
+        satDat->left = NULL;
+        satDat->right = NULL;
+        satDat->mediaType = NULL;
+        insertBST(bist, satDat);
+      }
+
+      // reset everything for next input
+      rindex = 0;
+      satDat = malloc(sizeof(SNODE));
+      word = malloc(wsize);
+
+    }
+    //when there is a tab, add the completed word to the correct struct item
+    else if(ch == '\t')
+    {
+      // Sets end string character for current word buffer
+      word[windex++] = '\0';
+
+      if(rindex == 1)
+      {
+        satDat->type = word;
+      }
+      else if(rindex == 2)
+      {
+        satDat->realTitle = word;
+        //if A, The, An is at the begining of the string
+        if (word[0] == 'T' && word[1] == 'h' && word[2] == 'e' && word[3] == ' ') {
+          tword = malloc(wsize);
+          for (int i=4; i<windex; i++){
+            tword[i-4] = word[i];
+          }
+          satDat->primaryTitle = tword;
+        }
+        else if (word[0] == 'A' && word[1] == ' ') {
+          tword = malloc(wsize);
+          for (int i=2; i<windex; i++){
+            tword[i-2] = word[i];
+          }
+          satDat->primaryTitle = tword;
+        }
+        else if (word[0] == 'A' && word[1] == 'n' && word[2] == ' ') {
+          tword = malloc(wsize);
+          for (int i=3; i<windex; i++){
+            tword[i-3] = word[i];
+          }
+          satDat->primaryTitle = tword;
+        }
+        else {
+          satDat->primaryTitle = word;
+        }
+      }
+      else if(rindex == 5)
+      {
+        satDat->startYr = word;
+      }
+      else if(rindex == 7)
+      {
+        satDat->runtimeMin = word;
+      }
+      else if(rindex == 8)
+      {
+        satDat->genres = word;
+      }
+      else
+      {
+        free(word);
+      }
+
+      // Reset word buffer, increment the row index
+      word = malloc(wsize);
+      windex = 0;
+      rindex++;
+    }
+    else
+    {
+      //add characters to buffer, first check if out of space
+      if (windex > wsize)
+      {
+        wsize = 2 * wsize;
+        word = realloc(word, wsize);
+      }
+      word[windex++] = ch;
+    }
+    ch = fgetc(fp);
+  }
+  return bist;
+}
+
+//reads in the user log and adds it to a seperate binary search tree
+BST* loadUserLog(char log[])
+{
+  BST *bist = newBST();
   char name[100];
   strcpy(name, log);
   strcat(name, ".log");
 
-  FILE *output = fopen(name, "w");
-  printRowWise(newishLog, output);
-  fclose(output);
-  return;
-}
-/*
-SNODE *parseThroughInput(char *input)
-{
-  fprintf(stdout, "Made it into new function");
-  SNODE *tempish = malloc(sizeof(SNODE));
-  int windex = 0;
-  int rindex = 0;
-  int wsize = 1000;
-  int tracker = 0;
-  char *tempWord = malloc(wsize);
-  while(input[tracker]!= '\0') //are you the issue?
+  if(access(name, F_OK) != -1)
   {
-    if(input[tracker] == '\t')
+    fprintf(stdout, "Successfully found: %s\n", name);
+  }
+  else
+  {
+    fprintf(stdout, "------------------------------- User Log -------------------------------\n");
+    fprintf(stdout, "------------------------------------------------------------------------\n");
+    return bist;
+  }
+
+  FILE *fp = fopen(name, "r+");
+
+  if(feof(fp))
+  {
+    return bist;
+  }
+
+  int ch, rindex, windex, wsize;
+  char* word;
+  char* tword;
+
+  wsize = 400;
+  word = malloc(wsize);
+  rindex = 0;
+  windex = 0;
+  ch = fgetc(fp);
+  if(ch == EOF) return bist;
+  SNODE* satDat = malloc(sizeof(SNODE));
+
+  while(ch != EOF)
+  {
+    // If newline, clear row buffer and insert new node
+    if(ch == '\n')
     {
-      tempWord[windex++] = '\0';
+    //  fprintf(stdout, "%s\n", word);
+      //define newline array
+
+      if(rindex == 4)
+      {
+        //fprintf(stdout, "Date added not here, manually setting\n");
+        satDat->mediaType = word;
+
+        word = malloc(400);
+        word[0] = '\\';
+        word[1] = 'N';
+        word[2] = '\0';
+        satDat->dateAdded = word;
+      }
+      else if(rindex == 5)
+      {
+        satDat->dateAdded = word;
+      }
+
+      insertBST(bist, satDat);
+
+      // reset buffers and row index for next entry
+      rindex = 0;
+      satDat = malloc(sizeof(SNODE));
+      word = malloc(wsize);
+
+    }
+    //if tab, write word to correct place
+    else if(ch == '\t')
+    {
+      //fprintf(stdout, " ");
+      // end word buffer with escape char
+      word[windex++] = '\0';
+
+      if(rindex == 0)
+      {
+        satDat->realTitle = word;
+        // if A, The, An is at the begining of the string
+        if (word[0] == 'T' && word[1] == 'h' && word[2] == 'e' && word[3] == ' ') {
+          tword = malloc(wsize);
+          for (int i=4; i<windex; i++){
+            tword[i-4] = word[i];
+          }
+          satDat->primaryTitle = tword;
+        }
+        else if (word[0] == 'A' && word[1] == ' ') {
+          tword = malloc(wsize);
+          for (int i=2; i<windex; i++){
+            tword[i-2] = word[i];
+          }
+          satDat->primaryTitle = tword;
+        }
+        else if (word[0] == 'A' && word[1] == 'n' && word[2] == ' ') {
+          tword = malloc(wsize);
+          for (int i=3; i<windex; i++){
+            tword[i-3] = word[i];
+          }
+          satDat->primaryTitle = tword;
+        }
+        else {
+          satDat->primaryTitle = word;
+        }
+      }
+      else if(rindex == 1)
+      {
+        satDat->startYr = word;
+      }
+      else if(rindex == 2)
+      {
+        satDat->runtimeMin = word;
+      }
+      else if(rindex == 3)
+      {
+        satDat->genres = word;
+      }
+      else if(rindex == 4)
+      {
+        satDat->mediaType = word;
+      }
+      else if(rindex == 5)
+      {
+        satDat->dateAdded = word;
+      }
+      else
+      {
+    //    fprintf(stdout, "FREEING WORD\n");
+        free(word);
+      }
+
+      // reset for next word
+      word = malloc(wsize);
       windex = 0;
-     if(rindex == 0)
-     {
-        tempish->primaryTitle = tempWord;
-     }
-     else if(rindex == 1)
-     {
-       tempish->startYr = tempWord;
-     }
-     else if(rindex == 2)
-     {
-       tempish->runtimeMin = tempWord;
-     }
-     else if(rindex == 3)
-     {
-       tempish->genres = tempWord;
-     }
-     else if(rindex == 4)
-     {
-       tempish->mediaType = tempWord;
-     }
-     else if(rindex == 5)
-     {
-       tempish->dateAdded = tempWord;
-     }
-     rindex++;
-   }
+      rindex++;
+    }
     else
     {
+      //add characters to buffer
       if (windex > wsize)
       {
         wsize = 2 * wsize;
-        tempWord = realloc(tempWord, wsize);
+        word = realloc(word, wsize);
       }
-      tempWord[windex++] = input[tracker];
+      word[windex++] = ch;
     }
-    tracker++;
+
+    ch = fgetc(fp);
   }
-  return tempish;
+  fclose(fp);
+
+  fprintf(stdout, "------------------------------- User Log -------------------------------\n");
+  printRowWise(getBSTroot(bist), stdout);
+  fprintf(stdout, "------------------------------------------------------------------------\n");
+
+  return bist;
 }
-*/
+
+//returns a struct element to be searched for
+SNODE *searchNode(char *str)
+{
+  SNODE *temp = malloc(sizeof(SNODE));
+  temp->primaryTitle = str;
+
+  return temp;
+}
+
+//write the userlog to the file
+void writeToFile(char log[], SNODE *newishLog)
+{
+  char name[100];
+  strcpy(name, log);
+  strcat(name, ".log");
+
+  fprintf(stdout, "Writing userlog: %s\n", name);
+
+  FILE *output = fopen(name, "w");
+  printRowWise(newishLog, output);
+  fclose(output);
+//  fprintf(stdout, "Successful write!\n");
+  return;
+}
+
 int main(void)
 {
   BST *database = newBST();
@@ -473,17 +414,12 @@ int main(void)
 
   SNODE *found = malloc(sizeof(SNODE));
   SNODE *item = malloc(sizeof(SNODE));
-  SNODE *duplicate;// = malloc(sizeof(SNODE));
+  SNODE *duplicate;
 
   char fileName[256];
-//  fileName = "input.txt";
   char logname[256];
-
-  //char *doInput = malloc(12*sizeof(char));
-  char doInput[12];
-  //char *itemsearch = malloc(250*sizeof(char));
+  char doInput[50];
   char itemsearch[250];
-  //char *input = malloc(1000*sizeof(char));
   char input[1000];
   char temp[1000];
 
@@ -491,97 +427,46 @@ int main(void)
   char dateAddedAnswer[15];
   strcpy(keepGoing, "y");
   strcpy(dateAddedAnswer, "n");
-  //keepGoing = {"y"};
-  //dateAddedAnswer = {"n"};
 
   fprintf(stdout, "Hello! Please enter the name of the IMDB datafile you would like to use.\n");
   fgets(fileName, 250, stdin);
   fileName[strcspn(fileName, "\n")] = 0;
 
-  //fprintf(stdout, "readin: %s|\n", fileName);
-
-
-
-
-  //fprintf(stdout, "Dont forget to un comment out user input :)\n");
-  //logname = "testlog";
-  //fprintf(stdout, "pre mass database insert\n");
   database = datasetIntoBST(database, fileName);
-
+/*
   fprintf(stdout, "----------------------DATABASE----------------------------\n");
   printRowWise(getBSTroot(database), stdout);
   fprintf(stdout, "----------------------------------------------------------\n");
-
-
-
-  /*SNODE *root = getBSTroot(database);
-  fprintf(stdout, "--------------------------\n");
-  fprintf(stdout, "root:: %s\n", root->primaryTitle);
-  */
-  /*
-  SNODE *gen;
-  char *gensearch = "girl";
-  gen = searchNode(gensearch);
-  */
-
-/*  found = findBST(userlog, item);
-  fprintf(stdout, "pastfind\n");
-  if (found == NULL) {
-    fprintf(stdout, "FINDING NEW\n");
-    found = findBST(tinybst, item);
-    SNODE *duplicate = malloc(sizeof(SNODE));
-    duplicate->primaryTitle = found->primaryTitle;
-    duplicate->genres = found->genres;
-    duplicate->startYr = found->startYr;
-    duplicate->runtimeMin = found->runtimeMin;
-    duplicate->type = found->type;
-    duplicate->dateAdded= found->dateAdded;
-    duplicate->mediaType= found->mediaType;
-    insertBST(userlog, duplicate);
-    found = findBST(userlog, item);
-  }
 */
-//  printOneItem(found, stdout);
-
 
   fprintf(stdout, "What log would you like to write to?\n");
   fgets(logname, 250, stdin);
   logname[strcspn(logname, "\n")] = 0;
 
-
-
-//  fprintf(stdout, "user innitialization\n");
-
-
   BST *userlog = loadUserLog(logname);
-  fprintf(stdout, "Here is your current log:: \n");
-  printRowWise(getBSTroot(userlog), stdout);
-//  fprintf(stdout, "made it here!\n");
+
 
 
   while(strcmp(keepGoing, "y") == 0)
   {
-    fprintf(stdout, "What would you like to do? (add, delete, update, retrieve)\n");
-    //scanf("%s", doInput);
-    fgets(doInput, 11, stdin);
+    fprintf(stdout, "What would you like to do? (add, delete, update, retrieve, changeUser)\n");
+    fgets(doInput, 25, stdin);
     doInput[strcspn(doInput, "\n")] = 0;
 
-    while(strcmp(doInput, "add")!= 0 && strcmp(doInput, "delete")!= 0 && strcmp(doInput, "update")!= 0 && strcmp(doInput, "retrieve") != 0 )//&& strcmp(doInput, "changeUser")!= 0)
+    while(strcmp(doInput, "add")!= 0 && strcmp(doInput, "delete")!= 0 && strcmp(doInput, "update")!= 0 && strcmp(doInput, "retrieve") != 0 && strcmp(doInput, "changeUser")!= 0)
     {
       printf("I'm sorry, that was not an option, please choose again\n");
       printf("What would you like to do? (add, delete, update, changeUser)\n");
-      fgets(doInput, 11, stdin);
+      fgets(doInput, 25, stdin);
       doInput[strcspn(doInput, "\n")] = 0;
     }
 
     if(strcmp(doInput, "add")==0)
     {
       fprintf(stdout, "What title would you like to search for?\n");
-      //scanf("%s", itemsearch);
-
       fgets(itemsearch, 250, stdin);
       itemsearch[strcspn(itemsearch, "\n")] = 0;
-      //fprintf(stdout, "itemsearch: %s\n", itemsearch);
+
       item = searchNode(itemsearch);
 
 
@@ -603,17 +488,10 @@ int main(void)
       fprintf(stdout, "Which movie would you like to add? Please copy and paste the title of the selection\n");
       fgets(input, 250, stdin);
       input[strcspn(input, "\n")] = 0;
-//      fprintf(stdout, ">|%s|<\n", input);
-
 
       SNODE *specific = malloc(sizeof(SNODE));
       specific = searchNode(input);
-    //  printOneItem(specific, stdout);
-  //    fprintf(stdout, "did die here?\n");
-  //    fprintf(stdout, "|%s|\n", specific->primaryTitle);
-      // ------------- Works up to here --------------
 
-      //fprintf(stdout, "FINDING NEW\n");
       found = findBST(tinybst, specific);
       while(found == NULL)
       {
@@ -627,36 +505,20 @@ int main(void)
       duplicate = malloc(sizeof(SNODE));
       duplicate->primaryTitle = found->primaryTitle;
       duplicate->realTitle = found->realTitle;
-      //fprintf(stdout, "1\n");
-      //fprintf(stdout, "checking title:: %s\n", found->realTitle);
       duplicate->genres = found->genres;
-      //fprintf(stdout, "checking title ***:: %s\n", duplicate->realTitle);
-      //fprintf(stdout, "2\n");
-      //fprintf(stdout, "checking gen:: %s\n", found->genres);
       duplicate->startYr = found->startYr;
-      //fprintf(stdout, "3\n");
-      //fprintf(stdout, "checking yr:: %s\n", found->startYr);
       duplicate->runtimeMin = found->runtimeMin;
-    //  fprintf(stdout, "checking min***:: %s\n", duplicate->runtimeMin);
-      //fprintf(stdout, "4\n");
-      //fprintf(stdout, "checking date:: %s\n", found->dateAdded);
       duplicate->dateAdded = found->dateAdded;
-      //fprintf(stdout, "checking date ***:: %s\n", duplicate->dateAdded);
-      //fprintf(stdout, "5\n");
-      //fprintf(stdout, "checking mediaType:: %s\n", found->mediaType);
       duplicate->mediaType = found->mediaType;
-      //fprintf(stdout, "past duplicate->mediaType\n");
 
       insertBST(userlog, duplicate);
 
-      //fprintf(stdout, "checking title again:: %s\n", found->realTitle);
       if (found == NULL)
       {
           fprintf(stdout, "why is this null\n");
       }
 
       fprintf(stdout, "What media type is this? (examples: blueray, dvd, digital)\n");
-      //scanf("%s", found->mediaType);
       fgets(temp, 15, stdin);
       temp[strcspn(temp, "\n")] = 0;
 
@@ -668,18 +530,15 @@ int main(void)
       }
       duplicate->mediaType = newmedia;
 
-      //     DATE ANSWER
       fprintf(stdout, "Would you like to add the date added? (y or n)\n");
-      //scanf("%c", &dateAddedAnswer);
       fgets(dateAddedAnswer, 3, stdin);
       dateAddedAnswer[strcspn(dateAddedAnswer, "\n")] = 0;
       if(strcmp(dateAddedAnswer, "y") == 0)
       {
         fprintf(stdout, "Please enter date added in MM/DD/YYYY format.\n");
-        //scanf("%s", found->dateAdded);
         fgets(temp, 15, stdin);
         temp[strcspn(temp, "\n")] = 0;
-        //strcpy(found->dateAdded, temp);
+
         char *newdate;
         newdate = malloc(100);
         for (int i=0; i<11; i++)
@@ -710,23 +569,28 @@ int main(void)
 
     else if(strcmp(doInput, "delete")==0)
     {
+      fprintf(stdout, "------------------------------- User Log -------------------------------\n");
       printRowWise(getBSTroot(userlog), stdout);
+      fprintf(stdout, "------------------------------------------------------------------------\n");
+
       fprintf(stdout, "Which selection would you like to delete? Please copy and paste the title from above.\n");
-      //scanf("%s ", input);
       fgets(input, 255, stdin);
       input[strcspn(input, "\n")] = 0;
-
+    //  fprintf(stdout, "input:: %s\n", input);
 
       SNODE *byebyebye = malloc(sizeof(SNODE));
       byebyebye = searchNode(input);
+      //printOneItem(byebyebye, stdout);
       deleteBST(userlog, byebyebye);
     }
 
     else if(strcmp(doInput, "update")==0)
     {
+      fprintf(stdout, "------------------------------- User Log -------------------------------\n");
       printRowWise(getBSTroot(userlog), stdout);
+      fprintf(stdout, "------------------------------------------------------------------------\n");
+
       fprintf(stdout, "Which selection would you like to update? Please copy and paste the title from above.\n");
-      //scanf("%s ", input); //will this work?
       fgets(input, 255, stdin);
       input[strcspn(input, "\n")] = 0;
 
@@ -734,7 +598,7 @@ int main(void)
       char reading[256];
       char updating[256];
       specific = searchNode(input);
-    //  fprintf(stdout, "FINDING NEW\n");
+      //  fprintf(stdout, "FINDING NEW\n");
       found = findBST(userlog, specific);
 
       while(found == NULL)
@@ -749,14 +613,11 @@ int main(void)
       }
       //ok this is great but why do some of them not exist?
 
-    //  fprintf(stdout, "MADE IT\n");
       fprintf(stdout, "What would you like to update? (title, year, runtime, genres, mediatype, date)\n");
-      //scanf("%s", reading);
       fgets(reading, 255, stdin);
       reading[strcspn(reading, "\n")] = 0;
 
       fprintf(stdout, "What would you like to update it to? \n");
-      //scanf("%s", updating);
       fgets(updating, 255, stdin);
       updating[strcspn(updating, "\n")] = 0;
       char *newnew;
@@ -820,42 +681,39 @@ int main(void)
         found->dateAdded = newnew;
         //strcpy(found->dateAdded, updating);
       }
+      else
+      {
+        fprintf(stdout, "Sorry, that was not an option, please choose to update again and input a valid choice.\n");
+      }
     }
     else if(strcmp(doInput, "retrieve") == 0)
     {
+      fprintf(stdout, "------------------------------- User Log -------------------------------\n");
       printRowWise(getBSTroot(userlog), stdout);
+      fprintf(stdout, "------------------------------------------------------------------------\n");
     }
-/*
     else if(strcmp(doInput, "changeUser") == 0)
     {
         writeToFile(logname, getBSTroot(userlog));
-      //  char logname2[256];
-      //  fprintf(stdout, "Which user log would you like to change to?\n");
+
         fprintf(stdout, "What log would you like to write to?\n");
-        fgets(temp, 250, stdin);
-        temp[strcspn(temp, "\n")] = 0;
+        fgets(logname, 250, stdin);
+        logname[strcspn(logname, "\n")] = 0;
 
-        char *newlog;
-        newlog = malloc(100);
-        for (int i=0; i<11; i++)
-        {
-          newlog[i] = temp[i];
-        }
-        strcpy(logname, newlog);
-
-        fprintf(stdout, "um what: %s\n", logname);
-        fprintf(stdout, "------------\n");
-        //userlog = loadUserLog(logname);
-        //strcpy(logname, logname2);
+        userlog = loadUserLog(logname);
     }
-    */
+
 
     tinybst = newBST();
     fprintf(stdout, "Change made, would you like to make other changes? (y or n)\n");
-    //scanf("%c", &keepGoing);
     fgets(keepGoing, 15, stdin);
     keepGoing[strcspn(keepGoing, "\n")] = 0;
-
+    while(strcmp(keepGoing, "n") != 0 && strcmp(keepGoing, "y") != 0)
+    {
+      fprintf(stdout, "Sorry, that was not an option, would you like to make other changes? (y or n)\n");
+      fgets(keepGoing, 15, stdin);
+      keepGoing[strcspn(keepGoing, "\n")] = 0;
+    }
   }
 
   writeToFile(logname, getBSTroot(userlog));

@@ -1,2 +1,2 @@
 all:
-	gcc bst.c database.c -o project
+	gcc -Wall -Wextra bst.c database.c -o project

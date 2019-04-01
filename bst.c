@@ -26,6 +26,7 @@ struct satelliteData
   void *parent;
 };
 
+//changes the string to lowercase
 char *lowercase(char *word)
 {
   char *str = malloc(4000);
@@ -35,14 +36,7 @@ char *lowercase(char *word)
   }
   return str;
 }
-
-/***************************************************************************************
-*    Title: bst.c
-*    Author: Matthew Rinne
-*    Date Accessed: <03/05/2019>
-*    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
-*
-***************************************************************************************/
+//swaps the two nodes
 void initSwapper(SNODE *n1,SNODE *n2)
 {
     void *x = n1->primaryTitle;
@@ -59,7 +53,7 @@ struct bst
     comparator comp;
 };
 
-
+//creates a new binary search tree
 extern BST *newBST()
 {
     BST *tree = malloc(sizeof(BST));
@@ -76,12 +70,13 @@ extern BST *newBST()
 *    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
 *
 ***************************************************************************************/
+//returns the root of the binary search tree
 extern SNODE *getBSTroot(BST *tree)
 {
     return tree->root;
 }
 
-
+//sets the root of the binary search tree
 extern void setBSTroot(BST *tree,SNODE *replacement)
 {
 //  fprintf(stdout, "setting root\n");
@@ -99,19 +94,17 @@ extern void setBSTroot(BST *tree,SNODE *replacement)
 *    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
 *
 ***************************************************************************************/
+//sets the size of the binary search tree
 extern void setBSTsize(BST *tree,int s)
 {
     tree->size = s;
 }
 
-
+//inserts the node into the binary search tree
 extern SNODE *insertBST(BST *tree,SNODE *value)
 {
-//  fprintf(stdout, "intro\n");
-
     SNODE *n;
     n = value;
-  //  fprintf(stdout, "help\n");
     assert(n != 0);
 
     if (tree->size == 0)
@@ -120,23 +113,12 @@ extern SNODE *insertBST(BST *tree,SNODE *value)
     }
     else
     {
-    //  fprintf(stdout, "oh hey there please work\n");
         SNODE *head, *tmp;
         int cmp, lvl = 0;
         head = getBSTroot(tree);
 
         while (head != NULL)
         {
-            /*
-            fprintf(stdout, "pre head print -->\n");
-            fprintf(stdout, "%s\t", head->primaryTitle);
-            fprintf(stdout, "%s\t", head->startYr);
-            fprintf(stdout, "%s\t", head->runtimeMin);
-            fprintf(stdout, "%s\t", head->genres);
-            fprintf(stdout, "%s\t", head->mediaType);
-            fprintf(stdout, "%s\t", head->dateAdded);
-            fprintf(stdout, "\npost head print -->\n");
-            */
             lvl++;
             if (head->primaryTitle == NULL)
             {
@@ -144,42 +126,20 @@ extern SNODE *insertBST(BST *tree,SNODE *value)
             }
             else
             {
-              //fprintf(stdout, "~~~~~~~~~~~~~~~~~~~~~~~~\n");
-              //fprintf(stdout, "~~~~~~ %s\n", n->primaryTitle);
-              //fprintf(stdout, "~~~~~~~~~~~~~~~~~~~~~~~~\n");
-              //fprintf(stdout, "************************\n");
-              //fprintf(stdout, "******* %s\n", head->primaryTitle); //so something is wrong with the head
-              //fprintf(stdout, "************************\n");
               cmp = strcmp(lowercase(head->primaryTitle), lowercase(n->primaryTitle)); //SEG FAULTING HERE!!!!
             }
-            //fprintf(stdout, "past cmp:: %d\n", cmp);
             if (cmp > 0)
             {
                 tmp = head->left;
                 if (tmp == NULL)
                 {
-                //  fprintf(stdout, "set left \n");
                     head->left = n;
                     n->parent = head;
-                    //fprintf(stdout, "if if\n");
                     break;
                 }
                 else
                 {
                     head = tmp;
-                    //fprintf(stdout, "if else\n");
-                    /*
-                    fprintf(stdout, " -->\n");
-                    fprintf(stdout, "%s\t", head->primaryTitle);
-                    fprintf(stdout, "%s\t", head->startYr);
-                    fprintf(stdout, "%s\t", head->runtimeMin);
-                    fprintf(stdout, "%s\t", head->genres);
-                    fprintf(stdout, "%s\t", head->mediaType);
-                    fprintf(stdout, "%s\t", head->dateAdded);
-                    fprintf(stdout, "\npost if else print -->\n");
-                    */
-                    //so i believe the issue is in here... porque???
-                    //perhaps when its called twice in a row
                 }
             }
             else if (cmp < 0)
@@ -187,41 +147,27 @@ extern SNODE *insertBST(BST *tree,SNODE *value)
                 tmp = head->right;
                 if (tmp == NULL)
                 {
-                //  fprintf(stdout, "set right \n");
                     head->right = n;
                     n->parent = head;
-                    //fprintf(stdout, "else if\n");
                     break;
                 }
                 else
                 {
                     head = tmp;
-                    //fprintf(stdout, "else else\n");
                 }
             }
             else
             {
                 return head;
-                //fprintf(stdout, "else\n");
                 break;
             }
         }
     }
-  //  fprintf(stdout, "successful INSERT\n");
-
-    //fprintf(stdout, "%s\t", n->primaryTitle);
-    //fprintf(stdout, "%s\t", n->startYr);
-    //fprintf(stdout, "%s\t", n->runtimeMin);
-    //fprintf(stdout, "%s\t", n->genres);
-    //fprintf(stdout, "%s\t", n->mediaType);
-    //fprintf(stdout, "%s\t", n->dateAdded);
-    //fprintf(stdout, "\nhmmm\n");
-
     setBSTsize(tree, tree->size + 1);
     return n;
 }
 
-
+//finds the node in the binary search tree
 extern void  *findBST(BST *tree,SNODE *key)
 {
     SNODE *head, *tmp;
@@ -229,8 +175,6 @@ extern void  *findBST(BST *tree,SNODE *key)
     head = getBSTroot(tree);
     while (head != NULL)
     {
-    //    fprintf(stdout, "~~~ %s\n", head->realTitle);
-    //    fprintf(stdout, "*** %s\n", key->primaryTitle);
         cmp = strcmp(lowercase(head->realTitle), lowercase(key->primaryTitle));
         if (cmp > 0)
         {
@@ -258,21 +202,16 @@ extern void  *findBST(BST *tree,SNODE *key)
     return NULL;
 }
 
-
-extern SNODE *locateBST(BST *tree,SNODE *key) {
-
+//finds and returns the node if found in the binary search tree
+extern SNODE *locateBST(BST *tree,SNODE *key)
+{
     SNODE *head, *tmp;
     int cmp;
     head = getBSTroot(tree);
-    //fprintf(stdout, "KEY:: %p\n", key->primaryTitle);
-    //fprintf(stdout, "key:: %p\n", key);
 
     while (head != NULL)
     {
-      //fprintf(stdout, "HEADD:: %p\n", head->primaryTitle);
-      //fprintf(stdout, "head:: %p\n", head);
-        cmp = strcmp(lowercase(head->primaryTitle), lowercase(key->primaryTitle));//make lower for comparisons
-        //fprintf(stdout, "Locate cmp:: %d\n", cmp);
+        cmp = strcmp(lowercase(head->realTitle), lowercase(key->primaryTitle));//make lower for comparisons
         if (cmp > 0)
         {
             tmp = head->left;
@@ -306,9 +245,12 @@ extern SNODE *locateBST(BST *tree,SNODE *key) {
 *    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
 *
 ***************************************************************************************/
-extern int deleteBST(BST *tree,void *key)
+//delete a node from the binary search tree
+extern int deleteBST(BST *tree, SNODE *key)
 {
+  //  fprintf(stdout, "key:: %s\n", key->realTitle);
     SNODE *tmp = locateBST(tree, key);
+  //  fprintf(stdout, "temp:: %s\n", tmp->realTitle);
     while (tmp == NULL)
     {
         printf("I'm sorry, this title does not exist in the log.\n");
@@ -330,6 +272,7 @@ extern int deleteBST(BST *tree,void *key)
 *    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
 *
 ***************************************************************************************/
+//find the previous node
 SNODE *findPredecessor(SNODE *node)
 {
     node = node->left;
@@ -352,6 +295,7 @@ SNODE *findPredecessor(SNODE *node)
 *    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
 *
 ***************************************************************************************/
+//find the next node
 SNODE *findSuccessor(SNODE *node)
 {
     node = node->right;
@@ -373,6 +317,7 @@ SNODE *findSuccessor(SNODE *node)
 *    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
 *
 ***************************************************************************************/
+//swap the correct leaf to take over its parent in the binary search tree
 extern SNODE *swapToLeafBST(BST *tree,SNODE *node)
 {
     if ((node->left == NULL) && (node->right == NULL))
@@ -404,8 +349,8 @@ extern SNODE *swapToLeafBST(BST *tree,SNODE *node)
 *    Author: Matthew Rinne
 *    Date Accessed: <03/05/2019>
 *    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
-*
 ***************************************************************************************/
+//removes the node from the tree
 extern void pruneLeafBST(BST *tree,SNODE *leaf)
 {
     SNODE *parent = leaf->parent;
@@ -432,13 +377,14 @@ extern void pruneLeafBST(BST *tree,SNODE *leaf)
 *    Link: <https://github.com/mdrinne/cs201-assign3/blob/master/bst.c>
 *
 ***************************************************************************************/
+//returns the size of the binary search tree
 extern int sizeBST(BST *tree)
 {
     return tree->size;
 }
 
 
-
+//build a smaller binary search tree to hold the search values
 extern void  *buildTinyBST(BST *tree,SNODE *key, BST *tiny)
 {
     SNODE *head, *tmp;
